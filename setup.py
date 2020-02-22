@@ -1,14 +1,22 @@
 #!/usr/bin/env python
 from setuptools import find_packages, setup
 
+try:
+    import ConfigParser as configparser
+except ImportError:
+    import configparser
+
 with open("README.rst") as f:
     LONG_DESCRIPTION = f.read()
 
+config = configparser.ConfigParser()
+config.read("setup.cfg")
+
 setup(
     name="mm_json",
-    version="0.0.1",
+    version=config.get("src", "version"),
     license="MIT",
-    description="Skeleton for Python projects.",
+    description="A small collection of tools to help converting to Marshmallow schemas",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/x-rst",
     author="Peilonrayz",
@@ -24,11 +32,11 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'typing',
-        'marshmallow',
-        'marshmallow_enum',
-        'marshmallow_union',
-        # 'typing_inspect_lib',
+        "typing",
+        "marshmallow",
+        "marshmallow_enum",
+        "marshmallow_union",
+        "typing_inspect_lib",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -37,6 +45,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",

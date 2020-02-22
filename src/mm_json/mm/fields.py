@@ -164,7 +164,6 @@ _base_conversions = {
     marshmallow.fields.List: List,
     marshmallow.fields.Tuple: Tuple,
     marshmallow.fields.Function: Function,
-
     marshmallow.fields.Number: Number,
     marshmallow.fields.NaiveDateTime: NaiveDateTime,
     marshmallow.fields.AwareDateTime: AwareDateTime,
@@ -173,7 +172,6 @@ _base_conversions = {
     marshmallow.fields.Method: Method,
     marshmallow.fields.Constant: Constant,
     marshmallow.fields.Pluck: Pluck,
-
     marshmallow_enum.EnumField: Enum,
     marshmallow_union.Union: Union,
 }

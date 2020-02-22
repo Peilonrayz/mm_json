@@ -1,16 +1,15 @@
-import typing
 import abc
+import typing
 
-
-_T = typing.TypeVar('_T')
+_T = typing.TypeVar("_T")
 
 
 class _GenericMeta(abc.ABCMeta):
     def __repr__(self):
-        return self.__module__ + '.' + self.__name__
+        return self.__module__ + "." + self.__name__
 
     def __call__(cls):
-        raise TypeError(f'Type {cls!r} cannot be instantiated.')
+        raise TypeError(f"Type {cls!r} cannot be instantiated.")
 
 
 class Constant(typing.Generic[_T], metaclass=_GenericMeta):
@@ -33,9 +32,9 @@ class Pluck(typing.Generic[_T], metaclass=_GenericMeta):
     pass
 
 
-Number = typing._SpecialForm('Number', doc='')
-Url = typing._SpecialForm('Url', doc='')
-Email = typing._SpecialForm('Email', doc='')
+Number = typing._SpecialForm("Number", doc="")
+Url = typing._SpecialForm("Url", doc="")
+Email = typing._SpecialForm("Email", doc="")
 
 # Not implemented:
 # marshmallow.Method

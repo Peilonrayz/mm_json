@@ -1,4 +1,4 @@
-mm_json
+MM JSON
 =======
 
 .. image:: https://travis-ci.com/Peilonrayz/mm_json.svg?branch=master
@@ -37,4 +37,4 @@ To run all tests run ``nox``. No venv is needed; nox makes all of them for us.
 License
 -------
 
-mm_json is available under the MIT license.
+MM JSON is available under the MIT license.

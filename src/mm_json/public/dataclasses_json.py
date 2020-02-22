@@ -1,6 +1,6 @@
 import dataclasses
-import typing
 import functools
+import typing
 
 import marshmallow
 
@@ -26,16 +26,18 @@ class DataclassesMixin:
         schema = {}
         annotations = typing.get_type_hints(cls)
         for field in dataclasses.fields(cls):
-            metadata = {'metadata': field.metadata.copy()}
+            metadata = {"metadata": field.metadata.copy()}
             if field.default_factory is not dataclasses.MISSING:
-                metadata['missing'] = field.default_factory
-                metadata['metadata']['default_factory'] = field.default_factory
+                metadata["missing"] = field.default_factory
+                metadata["metadata"]["default_factory"] = field.default_factory
             elif field.default is not dataclasses.MISSING:
-                metadata['missing'] = field.default
+                metadata["missing"] = field.default
             if field.default is not dataclasses.MISSING:
-                metadata['metadata']['default'] = field.default
+                metadata["metadata"]["default"] = field.default
 
-            schema[field.name] = converter.convert(annotations[field.name], metadata=metadata)
+            schema[field.name] = converter.convert(
+                annotations[field.name], metadata=metadata
+            )
 
         SchemaClass = marshmallow.Schema.from_dict(schema, name=cls.__name__)
 
@@ -51,8 +53,9 @@ def dataclass_json(obj=None, *, converter=None):
     def inner(obj):
         mapping = {}
         if converter is not None:
-            mapping['_default_converter'] = converter
+            mapping["_default_converter"] = converter
         return type(obj.__name__, (obj, DataclassesMixin), mapping)
+
     if obj is None:
         return inner
     return inner(obj)

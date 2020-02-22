@@ -11,16 +11,18 @@ def dataclass_json(obj=None, *, converter=Converter()):
         schema = {}
         annotations = typing.get_type_hints(obj)
         for field in dataclasses.fields(obj):
-            metadata = {'metadata': field.metadata.copy()}
+            metadata = {"metadata": field.metadata.copy()}
             if field.default_factory is not dataclasses.MISSING:
-                metadata['missing'] = field.default_factory
-                metadata['metadata']['default_factory'] = field.default_factory
+                metadata["missing"] = field.default_factory
+                metadata["metadata"]["default_factory"] = field.default_factory
             elif field.default is not dataclasses.MISSING:
-                metadata['missing'] = field.default
+                metadata["missing"] = field.default
             if field.default is not dataclasses.MISSING:
-                metadata['metadata']['default'] = field.default
+                metadata["metadata"]["default"] = field.default
 
-            schema[field.name] = converter.convert(annotations[field.name], metadata=metadata)
+            schema[field.name] = converter.convert(
+                annotations[field.name], metadata=metadata
+            )
 
         SchemaClass = marshmallow.Schema.from_dict(schema, name=obj.__name__)
 
@@ -31,6 +33,7 @@ def dataclass_json(obj=None, *, converter=Converter()):
 
         obj.schema = Schema()
         return obj
+
     if obj is not None:
         return inner(obj)
     return inner

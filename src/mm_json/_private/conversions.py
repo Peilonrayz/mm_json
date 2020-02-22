@@ -2,10 +2,10 @@ import collections
 import datetime
 import decimal
 import enum
+import inspect
 import typing
 import uuid
 import warnings
-import inspect
 
 import marshmallow
 import typing_inspect_lib
@@ -25,7 +25,7 @@ def _to_internal_conversions(conversions):
     output = {}
     for key, value in conversions.items():
         value = mm.fields._base_conversions.get(value, value)
-        if not hasattr(value, 'from_typing'):
+        if not hasattr(value, "from_typing"):
             warnings.warn(f"Marshmallow type {value} doesn't expose `from_typing`.")
 
         type_, *t_args = key if isinstance(key, tuple) else (key,)
@@ -39,9 +39,9 @@ def _to_internal_conversions(conversions):
             output[new_key] = value
         elif output[new_key] is not value:
             raise ValueError(
-                f'Two keys map to the same unwrapped type, {new_key}, '
-                f'but have different marshmallow types - '
-                f'{output[new_key]} != {value}'
+                f"Two keys map to the same unwrapped type, {new_key}, "
+                f"but have different marshmallow types - "
+                f"{output[new_key]} != {value}"
             )
     return output
 
@@ -52,39 +52,40 @@ class ConversionType(enum.Flag):
 
 
 class Converter:
-    __CONVERSIONS = collections.ChainMap(_to_internal_conversions({
-        int: marshmallow.fields.Integer,
-        float: marshmallow.fields.Float,
-        str: marshmallow.fields.String,
-        bool: marshmallow.fields.Boolean,
-        datetime.datetime: marshmallow.fields.DateTime,
-        datetime.time: marshmallow.fields.Time,
-        datetime.timedelta: marshmallow.fields.TimeDelta,
-        datetime.date: marshmallow.fields.Date,
-        decimal.Decimal: marshmallow.fields.Decimal,
-        uuid.UUID: marshmallow.fields.UUID,
-        typing.Any: marshmallow.fields.Raw,
-
-        typing.Mapping: marshmallow.fields.Mapping,
-        typing.MutableMapping: marshmallow.fields.Mapping,
-        typing.Dict: marshmallow.fields.Dict,
-        typing.List: marshmallow.fields.List,
-        typing.Tuple: marshmallow.fields.Tuple,
-        (typing.Tuple, list): mm.fields.VarTuple,
-        typing.Callable: marshmallow.fields.Function,
-
-        enum.Enum: mm.fields.Enum,
-        typing.Union: mm.fields.Union,
-
-        mm.typing.DateTime: marshmallow.fields.DateTime,
-        mm.typing.AwareDateTime: marshmallow.fields.AwareDateTime,
-        mm.typing.NaiveDateTime: marshmallow.fields.NaiveDateTime,
-        mm.typing.Constant: marshmallow.fields.Constant,
-        mm.typing.Pluck: marshmallow.fields.Pluck,
-        mm.typing.Number: marshmallow.fields.Number,
-        mm.typing.Url: marshmallow.fields.Url,
-        mm.typing.Email: marshmallow.fields.Email,
-    }))
+    __CONVERSIONS = collections.ChainMap(
+        _to_internal_conversions(
+            {
+                int: marshmallow.fields.Integer,
+                float: marshmallow.fields.Float,
+                str: marshmallow.fields.String,
+                bool: marshmallow.fields.Boolean,
+                datetime.datetime: marshmallow.fields.DateTime,
+                datetime.time: marshmallow.fields.Time,
+                datetime.timedelta: marshmallow.fields.TimeDelta,
+                datetime.date: marshmallow.fields.Date,
+                decimal.Decimal: marshmallow.fields.Decimal,
+                uuid.UUID: marshmallow.fields.UUID,
+                typing.Any: marshmallow.fields.Raw,
+                typing.Mapping: marshmallow.fields.Mapping,
+                typing.MutableMapping: marshmallow.fields.Mapping,
+                typing.Dict: marshmallow.fields.Dict,
+                typing.List: marshmallow.fields.List,
+                typing.Tuple: marshmallow.fields.Tuple,
+                (typing.Tuple, list): mm.fields.VarTuple,
+                typing.Callable: marshmallow.fields.Function,
+                enum.Enum: mm.fields.Enum,
+                typing.Union: mm.fields.Union,
+                mm.typing.DateTime: marshmallow.fields.DateTime,
+                mm.typing.AwareDateTime: marshmallow.fields.AwareDateTime,
+                mm.typing.NaiveDateTime: marshmallow.fields.NaiveDateTime,
+                mm.typing.Constant: marshmallow.fields.Constant,
+                mm.typing.Pluck: marshmallow.fields.Pluck,
+                mm.typing.Number: marshmallow.fields.Number,
+                mm.typing.Url: marshmallow.fields.Url,
+                mm.typing.Email: marshmallow.fields.Email,
+            }
+        )
+    )
 
     def __init__(self, conversions=None):
         if conversions is not None:
@@ -93,20 +94,20 @@ class Converter:
 
     @staticmethod
     def _optional_mutations(type_, metadata):
-        metadata.setdefault('default', None)
-        metadata.setdefault('missing', None)
-        metadata['required'] = False
+        metadata.setdefault("default", None)
+        metadata.setdefault("missing", None)
+        metadata["required"] = False
 
     @staticmethod
     def _new_type_mutations(type_, metadata):
-        metadata.setdefault('description', type_.__name__)
+        metadata.setdefault("description", type_.__name__)
 
     def _make_type(self, type_, metadata, arguments):
         if type_ not in self.conversions:
-            raise ValueError(f'No conversion for type {type_}')
+            raise ValueError(f"No conversion for type {type_}")
         class_ = self.conversions[type_]
         arguments = (self._convert(a, metadata=metadata) for a in arguments)
-        if hasattr(class_, 'from_typing'):
+        if hasattr(class_, "from_typing"):
             return class_.from_typing(self, arguments, **metadata)
         return class_(*arguments, **metadata)
 
@@ -122,19 +123,17 @@ class Converter:
         return self._make_type(tuple_type, metadata, args)
 
     def _handle_default(self, type_, type_info, metadata):
-        warnings.warn(f'Unknown type {type_!r}.')
+        warnings.warn(f"Unknown type {type_!r}.")
         return self._make_type(typing.Any, metadata, ())
 
     def _handle_enum(self, type_, type_info, metadata):
-        metadata.setdefault('enum', type_)
+        metadata.setdefault("enum", type_)
         return self._make_type(enum.Enum, metadata, ())
 
     def _handle_union(self, type_, type_info, metadata):
         args = type_info.args
         nonnone_args = [a for a in args if a is not NoneType]
-        if not (type_info.unwrapped is typing.Optional
-                or len(nonnone_args) == 1
-        ):
+        if not (type_info.unwrapped is typing.Optional or len(nonnone_args) == 1):
             return self._make_type(typing.Union, metadata, args)
         elif typing.Optional in self.conversions:
             return self._make_type(typing.Optional, metadata, args)
@@ -144,17 +143,14 @@ class Converter:
             return self._convert(new_type, metadata=metadata)
 
     def _is_new_type(self, type_):
-        return (
-            getattr(type_, '__supertype__', None)
-            and inspect.isfunction(type_)
-        )
+        return getattr(type_, "__supertype__", None) and inspect.isfunction(type_)
 
     def _handle_new_type(self, type_, type_info, metadata):
         self._new_type_mutations(type_, metadata)
         return self._convert(type_.__supertype__, metadata=metadata)
 
     def _handle_other(self, type_, type_info, metadata):
-        raise ValueError(f'Unknown type {type_}.')
+        raise ValueError(f"Unknown type {type_}.")
 
     def _convert(self, type_, *, metadata):
         type_info = typing_inspect_lib.get_type_info(type_)
@@ -167,10 +163,9 @@ class Converter:
         if unwrapped is typing.Tuple:
             return self._handle_tuple(type_, type_info, metadata)
 
-        if (type_info and (
-                type_info.unwrapped is typing.Optional
-                or type_info.unwrapped is typing.Union
-            )
+        if type_info and (
+            type_info.unwrapped is typing.Optional
+            or type_info.unwrapped is typing.Union
         ):
             return self._handle_union(type_, type_info, metadata)
 
